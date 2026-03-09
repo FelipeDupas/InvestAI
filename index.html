@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu InvestAI — Painel Diário</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles/main.css">
+</head>
+<body>
+<div class="container">
+
+  <div class="masthead">
+    <div class="masthead-top">
+      <div class="masthead-meta">Perfil: Moderado<br>Frequência: Diária</div>
+      <div class="masthead-title">Meu InvestAI <em>&</em> Mercados</div>
+      <div class="masthead-meta masthead-meta-right" id="todayDate">Carregando...<br>Edição Diária</div>
+    </div>
+    <div class="masthead-sub">
+      <div class="sub-item"><span class="market-dot" style="background:var(--b3)"></span>B3 Brasil</div>
+      <div class="sub-item"><span class="market-dot" style="background:var(--nyse)"></span>NYSE / Nasdaq</div>
+      <div class="sub-item"><span class="market-dot" style="background:var(--fii)"></span>FIIs &amp; ETFs</div>
+    </div>
+  </div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" id="btnTabAnalise" >📊 Análise de Mercado</button>
+    <button class="tab-btn" id="btnTabCarteira" >
+      💼 Minha Carteira <span class="tab-badge" id="carteiraBadge">0</span>
+    </button>
+    <button class="tab-btn" id="btnTabPerfil" >⚙ Meu Perfil</button>
+  </div>
+
+  <!-- TAB ANÁLISE -->
+  <div class="tab-panel active" id="tab-analise">
+    <div class="toolbar">
+      <div class="toolbar-left" id="lastUpdate">Selecione um mercado para analisar</div>
+      <div class="profile-badge">Risco: <strong id="badgeRisco">Moderado</strong> &nbsp;·&nbsp; Horizonte: <strong id="badgeHorizonte">Médio prazo</strong></div>
+    </div>
+
+    <div style="display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap;">
+      <button class="market-run-btn" id="btnBR" >
+        <span style="font-size:1.4rem;">🇧🇷</span>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;">Mercado Brasileiro</div>
+          <div style="font-size:0.72rem;opacity:0.7;margin-top:2px;">B3 · FIIs · ETFs · Macro BR</div>
+        </div>
+        <span class="run-arrow">→</span>
+      </button>
+      <button class="market-run-btn" id="btnUS" >
+        <span style="font-size:1.4rem;">🇺🇸</span>
+        <div>
+          <div style="font-weight:700;font-size:0.9rem;">Mercado Americano</div>
+          <div style="font-size:0.72rem;opacity:0.7;margin-top:2px;">NYSE · Nasdaq · S&P500 · Fed</div>
+        </div>
+        <span class="run-arrow">→</span>
+      </button>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <!-- TAB CARTEIRA -->
+  <div class="tab-panel" id="tab-carteira">
+
+    <div class="portfolio-summary">
+      <div class="summary-card">
+        <div class="summary-card-label">Total Investido</div>
+        <div class="summary-card-value" id="sumInvestido">R$ —</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Valor Atual</div>
+        <div class="summary-card-value" id="sumAtual">R$ —</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Resultado (R$)</div>
+        <div class="summary-card-value" id="sumResultado">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Rentabilidade</div>
+        <div class="summary-card-value" id="sumPct">—%</div>
+      </div>
+    </div>
+
+    <div class="add-form-wrap">
+      <div class="add-form-title">// Adicionar posição à carteira</div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--ink-muted);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;">Mercado</div>
+        <div class="market-toggle">
+          <button class="mkt-btn active-br" id="mktBR" >🇧🇷 Brasil (B3)</button>
+          <button class="mkt-btn" id="mktUS" >🇺🇸 EUA (NYSE/Nasdaq)</button>
+        </div>
+        <div class="price-currency-label" id="currencyHint">Preço em R$ (reais)</div>
+      </div>
+
+      <div class="add-form-grid">
+        <div class="form-group">
+          <label>Ticker</label>
+          <input type="text" id="inTicker" placeholder="PETR4, VALE3..." >
+        </div>
+        <div class="form-group">
+          <label>Nome (opcional)</label>
+          <input type="text" id="inNome" placeholder="Petrobras">
+        </div>
+        <div class="form-group">
+          <label id="precoLabel">Preço de compra (R$)</label>
+          <input type="number" id="inPreco" placeholder="38.50" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>Quantidade</label>
+          <input type="number" id="inQtd" placeholder="100" min="1">
+        </div>
+        <button class="btn-add" id="btnAddPosition">+ Adicionar</button>
+      </div>
+      <div class="form-hint" id="formHint">
+        💡 Ações B3: PETR4, VALE3, ITUB4, MXRF11... · Preço em reais
+      </div>
+    </div>
+
+    <div class="portfolio-actions">
+      <div class="section-title" style="margin:0;border:none;padding:0;">// Posições</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="prices-status" id="pricesStatus">Preços ainda não atualizados</span>
+        <button class="btn-update-prices" id="btnUpdatePrices" >⟳ Atualizar Preços</button>
+      </div>
+    </div>
+
+    <div class="portfolio-table-wrap">
+      <table class="portfolio-table">
+        <thead>
+          <tr>
+            <th>Ativo</th>
+            <th>Preço Compra</th>
+            <th>Qtd</th>
+            <th>Total Investido</th>
+            <th>Preço Atual</th>
+            <th>Valor Atual</th>
+            <th style="text-align:right">Performance</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="portfolioBody">
+          <tr><td colspan="8"><div class="empty-state">Nenhuma posição ainda.<br>Adicione seu primeiro investimento acima ↑</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="export-row">
+      <button class="btn-export" id="btnExport">↓ Exportar JSON</button>
+      <button class="btn-export" id="btnImport">↑ Importar JSON</button>
+      <input type="file" id="importInput" accept=".json" style="display:none" >
+    </div>
+  </div>
+
+
+  <!-- TAB PERFIL -->
+  <div class="tab-panel" id="tab-perfil">
+    <div class="profile-tab-wrap">
+
+      <div class="current-profile-display" id="currentProfileDisplay">
+        <div class="profile-chip">Risco: <strong id="chipRisco">Moderado</strong></div>
+        <div class="profile-chip">Horizonte: <strong id="chipHorizonte">Médio prazo</strong></div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">// Perfil de Risco</div>
+        <div class="option-group" id="riscoGroup">
+
+          <div class="option-card" data-group="risco" data-value="conservador" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Conservador <span class="option-tag tag-low">BAIXO RISCO</span></div>
+              <div class="option-desc">Prioriza preservação de capital. Prefere renda fixa, títulos do tesouro, CDBs e FIIs de tijolo estáveis. Aceita retornos menores em troca de segurança.</div>
+            </div>
+          </div>
+
+          <div class="option-card selected" data-group="risco" data-value="moderado" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Moderado <span class="option-tag tag-mid">MÉDIO RISCO</span></div>
+              <div class="option-desc">Equilibra risco e retorno. Diversifica entre renda fixa e variável. Aceita volatilidade moderada em busca de crescimento consistente no médio prazo.</div>
+            </div>
+          </div>
+
+          <div class="option-card" data-group="risco" data-value="arrojado" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Arrojado <span class="option-tag tag-high">ALTO RISCO</span></div>
+              <div class="option-desc">Foca em crescimento acelerado. Aceita alta volatilidade e drawdowns significativos. Investe em ações de crescimento, small caps e ativos internacionais.</div>
+            </div>
+          </div>
+
+          <div class="option-card" data-group="risco" data-value="especulativo" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Especulativo <span class="option-tag tag-high">MUITO ALTO RISCO</span></div>
+              <div class="option-desc">Opera com alta alavancagem e ativos de altíssima volatilidade. Inclui criptomoedas, opções e penny stocks. Risco de perda total do capital.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">// Horizonte de Investimento</div>
+        <div class="option-group" id="horizonteGroup">
+
+          <div class="option-card" data-group="horizonte" data-value="curtissimo" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Curtíssimo prazo <span class="option-tag tag-mid">até 1 mês</span></div>
+              <div class="option-desc">Operações de curto prazo, swing trade e análise técnica. Foco em momentum e catalisadores imediatos.</div>
+            </div>
+          </div>
+
+          <div class="option-card" data-group="horizonte" data-value="curto" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Curto prazo <span class="option-tag tag-mid">1 – 3 meses</span></div>
+              <div class="option-desc">Posições táticas baseadas em tendências de curto prazo, resultados trimestrais e eventos macro.</div>
+            </div>
+          </div>
+
+          <div class="option-card selected" data-group="horizonte" data-value="medio" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Médio prazo <span class="option-tag tag-mid">6 – 12 meses</span></div>
+              <div class="option-desc">Investe em fundamentos e tendências setoriais. Equilibra timing de mercado com análise fundamentalista sólida.</div>
+            </div>
+          </div>
+
+          <div class="option-card" data-group="horizonte" data-value="longo" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Longo prazo <span class="option-tag tag-low">2 – 5 anos</span></div>
+              <div class="option-desc">Estratégia buy-and-hold com foco em empresas de qualidade e crescimento sustentável. Ignora volatilidade de curto prazo.</div>
+            </div>
+          </div>
+
+          <div class="option-card" data-group="horizonte" data-value="muitolongo" >
+            <div class="option-radio"></div>
+            <div class="option-body">
+              <div class="option-label">Muito longo prazo <span class="option-tag tag-low">5+ anos</span></div>
+              <div class="option-desc">Foco em acumulação patrimonial. Reinvestimento de dividendos, aportes regulares e paciência para atravessar ciclos completos.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="profile-save-btn" id="btnSaveProfile">✓ Salvar Perfil</button>
+      <div class="profile-saved-msg" id="savedMsg">✓ Perfil salvo! A próxima análise usará suas novas configurações.</div>
+
+    </div>
+  </div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title">Remover posição</div>
+    <div class="modal-msg" id="modalMsg">Tem certeza que deseja remover este ativo da carteira?</div>
+    <div class="modal-btns">
+      <button class="modal-btn-cancel" id="btnModalCancel">Cancelar</button>
+      <button class="modal-btn-confirm" id="btnModalConfirm">Remover</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script type="module" src="src/js/ui/render.js"></script>
+</body>
+</html>
