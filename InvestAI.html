@@ -514,6 +514,7 @@ body::before {
 </div>
 
 <script>
+const esc = (s) => (s||'').toString().replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]));
 // ── STATE ──────────────────────────────────
 const now = new Date();
 const dateStr = now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
@@ -556,10 +557,10 @@ function saveProfile() {
 
 function updateProfileDisplay() {
   // Update masthead
-  document.querySelector('.masthead-meta').innerHTML = `Perfil: ${RISCO_LABELS[userProfile.risco]}<br>Horizonte: ${HORIZONTE_SHORT[userProfile.horizonte]}`;
+  document.querySelector('.masthead-meta').innerHTML = `Perfil: ${esc(RISCO_LABELS[userProfile.risco])}<br>Horizonte: ${esc(HORIZONTE_SHORT[userProfile.horizonte])}`;
   // Update toolbar badge
   const pb = document.querySelector('.profile-badge');
-  if(pb) pb.innerHTML = `Risco: <strong>${RISCO_LABELS[userProfile.risco]}</strong> &nbsp;·&nbsp; Horizonte: <strong>${HORIZONTE_SHORT[userProfile.horizonte]}</strong>`;
+  if(pb) pb.innerHTML = `Risco: <strong>${esc(RISCO_LABELS[userProfile.risco])}</strong> &nbsp;·&nbsp; Horizonte: <strong>${esc(HORIZONTE_SHORT[userProfile.horizonte])}</strong>`;
   const br = document.getElementById('badgeRisco'); if(br) br.textContent = RISCO_LABELS[userProfile.risco];
   const bh = document.getElementById('badgeHorizonte'); if(bh) bh.textContent = HORIZONTE_SHORT[userProfile.horizonte];
   // Update chips in profile tab
@@ -681,7 +682,7 @@ Gere ${numTrends} tendências diversas com tickers reais (exemplos: ${exTickers}
     document.getElementById('lastUpdate').textContent=`${mktLabel} · ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
     if(portfolio.length>0) updatePrices();
   } catch(err) {
-    results.innerHTML=`<div style="padding:40px;text-align:center;font-family:var(--font-mono);font-size:0.75rem;color:var(--bear)">Erro ao obter análise.<br><br>${err.message}</div>`;
+    results.innerHTML=`<div style="padding:40px;text-align:center;font-family:var(--font-mono);font-size:0.75rem;color:var(--bear)">Erro ao obter análise.<br><br>${esc(err.message)}</div>`;
   }
   btnBR.disabled=false; btnUS.disabled=false;
 }
@@ -693,17 +694,17 @@ function renderAnalise(data, mercado) {
     const arrow=dir==='bullish'?'↑':dir==='bearish'?'↓':'→';
     const label=dir==='bullish'?'Alta':dir==='bearish'?'Baixa':'Neutro';
     const fillCls=dir==='bullish'?'fill-bull':dir==='bearish'?'fill-bear':'fill-neutral';
-    const motivos=(t.motivos||[]).map((m,mi)=>`<div class="reason"><div class="reason-icon">${icons[mi%icons.length]}</div><div class="reason-body"><div class="reason-title">${m.titulo}</div><div class="reason-desc">${m.descricao}</div></div></div>`).join('');
+    const motivos=(t.motivos||[]).map((m,mi)=>`<div class="reason"><div class="reason-icon">${icons[mi%icons.length]}</div><div class="reason-body"><div class="reason-title">${esc(m.titulo)}</div><div class="reason-desc">${esc(m.descricao)}</div></div></div>`).join('');
     const ticker = t.ticker || '';
-    const tickerBadge = ticker ? `<span style="font-family:var(--font-mono);font-size:0.7rem;font-weight:600;color:var(--ink-muted);background:var(--bg);border:1px solid var(--rule);padding:2px 8px;border-radius:4px;margin-left:8px;">${ticker}</span>` : '';
-    return `<div class="trend-card ${dir}"><div class="card-row1"><div class="card-left"><div class="card-num">Nº ${String(i+1).padStart(2,'0')} / 0${(data.tendencias||[]).length}</div><div class="card-name">${t.nome}${tickerBadge}</div><div>${tagFor(t.categoria)}</div></div><div class="card-right"><div class="direction-pill pill-${dir}">${arrow} ${label}</div><div class="conviction-wrap"><div class="conviction-bar"><div class="conviction-fill ${fillCls}" style="width:${t.score}%"></div></div><span>${t.score}%</span></div></div></div><div class="card-analysis">${t.analise}</div><div class="card-reasons">${motivos}</div></div>`;
+    const tickerBadge = ticker ? `<span style="font-family:var(--font-mono);font-size:0.7rem;font-weight:600;color:var(--ink-muted);background:var(--bg);border:1px solid var(--rule);padding:2px 8px;border-radius:4px;margin-left:8px;">${esc(ticker)}</span>` : '';
+    return `<div class="trend-card ${dir}"><div class="card-row1"><div class="card-left"><div class="card-num">Nº ${String(i+1).padStart(2,'0')} / 0${(data.tendencias||[]).length}</div><div class="card-name">${esc(t.nome)}${tickerBadge}</div><div>${tagFor(t.categoria)}</div></div><div class="card-right"><div class="direction-pill pill-${dir}">${arrow} ${label}</div><div class="conviction-wrap"><div class="conviction-bar"><div class="conviction-fill ${fillCls}" style="width:${t.score}%"></div></div><span>${t.score}%</span></div></div></div><div class="card-analysis">${esc(t.analise)}</div><div class="card-reasons">${motivos}</div></div>`;
   }).join('');
 
   document.getElementById('results').innerHTML=`
-    <div class="edition-header"><div class="edition-label">Edição de ${dateShort}</div><div class="edition-date">${(data.tendencias||[]).length} tendências · ${RISCO_LABELS[userProfile.risco]}<br>${mercado==='US'?'NYSE · Nasdaq · ETFs USA':'B3 · FIIs · ETFs BR'}</div></div>
+    <div class="edition-header"><div class="edition-label">Edição de ${dateShort}</div><div class="edition-date">${(data.tendencias||[]).length} tendências · ${esc(RISCO_LABELS[userProfile.risco])}<br>${mercado==='US'?'NYSE · Nasdaq · ETFs USA':'B3 · FIIs · ETFs BR'}</div></div>
     <div class="section-title">// Tendências do Dia</div>
     <div class="trends-list">${cardsHtml}</div>
-    <div class="macro-box"><div class="macro-label">// Panorama Macroeconômico</div><div class="macro-text">${data.resumo_macro}</div></div>
+    <div class="macro-box"><div class="macro-label">// Panorama Macroeconômico</div><div class="macro-text">${esc(data.resumo_macro)}</div></div>
     <hr class="footer-rule">
     <div class="footer-note"><strong>⚠ Aviso:</strong> Análise gerada por IA com fins informativos. Não é recomendação de investimento. Consulte um CFP/CEA antes de investir.<br>InvestAI · Powered by Claude · ${dateShort}</div>`;
 }
@@ -762,12 +763,12 @@ async function fetchCardPrices(tendencias) {
           <div class="price-tag-value">R$ ${priceBRL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
           <div class="price-tag-sub">$${price.toFixed(2)} · R$${cambio.toFixed(2)}/USD</div>
           <div style="font-family:var(--font-mono);font-size:0.62rem;font-weight:600;color:${varColor};">${varSign}${varPct.toFixed(2)}% hoje</div>
-          <div class="price-tag-label">${t.ticker} · tempo real</div>`;
+          <div class="price-tag-label">${esc(t.ticker)} · tempo real</div>`;
       } else {
         priceHtml = `
           <div class="price-tag-value">R$ ${price.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
           <div style="font-family:var(--font-mono);font-size:0.62rem;font-weight:600;color:${varColor};">${varSign}${varPct.toFixed(2)}% hoje</div>
-          <div class="price-tag-label">${t.ticker} · tempo real</div>`;
+          <div class="price-tag-label">${esc(t.ticker)} · tempo real</div>`;
       }
 
       priceTagEl.innerHTML = priceHtml;
@@ -877,11 +878,11 @@ function renderPortfolio() {
     const pct = resultado != null ? (resultado / investidoBRL) * 100 : null;
     let pctHtml=`<span style="color:var(--ink-faint);font-family:var(--font-mono);font-size:0.75rem;">—</span>`;
     if(pct!=null){const cls=pct>0?'pct-pos':pct<0?'pct-neg':'pct-zero';const sign=pct>0?'+':'';pctHtml=`<span class="pct-badge ${cls}">${sign}${pct.toFixed(2)}%</span>`;}
-    const precoAtualHtml=p.precoAtual!=null?`<span class="td-mono">${fmt(p.precoAtual,'')}</span>${isUSD && p.precoAtualUSD ? `<div style="font-size:0.6rem;color:var(--nyse);margin-top:2px;">$${p.precoAtualUSD.toFixed(2)} USD</div>` : ''}${p.dataUpdate?`<div style="font-size:0.6rem;color:var(--ink-faint);margin-top:2px;">${p.dataUpdate}</div>`:''}`:`<span style="color:var(--ink-faint);font-size:0.75rem;font-family:var(--font-mono);">—</span>`;
+    const precoAtualHtml=p.precoAtual!=null?`<span class="td-mono">${fmt(p.precoAtual,'')}</span>${isUSD && p.precoAtualUSD ? `<div style="font-size:0.6rem;color:var(--nyse);margin-top:2px;">$${p.precoAtualUSD.toFixed(2)} USD</div>` : ''}${p.dataUpdate?`<div style="font-size:0.6rem;color:var(--ink-faint);margin-top:2px;">${esc(p.dataUpdate)}</div>`:''}`:`<span style="color:var(--ink-faint);font-size:0.75rem;font-family:var(--font-mono);">—</span>`;
     const resultadoHtml=resultado!=null?`<div>${pctHtml}</div><div class="td-mono" style="margin-top:4px;color:${resultado>=0?'var(--bull)':'var(--bear)'};">${resultado>=0?'+':''}${fmt(resultado)}</div>`:pctHtml;
-    const commentHtml=p.comentarioIA?`<div class="ai-comment">🤖 ${p.comentarioIA}</div>`:'';
+    const commentHtml=p.comentarioIA?`<div class="ai-comment">🤖 ${esc(p.comentarioIA)}</div>`:'';
     return `<tr>
-      <td><div style="display:flex;align-items:center;gap:6px;"><div class="td-ticker">${p.ticker}</div><span style="font-size:0.75rem;">${isUSD ? '🇺🇸' : '🇧🇷'}</span></div>${p.nome!==p.ticker?`<div class="td-name">${p.nome}</div>`:''}<div style="font-size:0.6rem;color:var(--ink-faint);">${p.dataCompra}</div>${commentHtml}</td>
+      <td><div style="display:flex;align-items:center;gap:6px;"><div class="td-ticker">${esc(p.ticker)}</div><span style="font-size:0.75rem;">${isUSD ? '🇺🇸' : '🇧🇷'}</span></div>${p.nome!==p.ticker?`<div class="td-name">${esc(p.nome)}</div>`:''}<div style="font-size:0.6rem;color:var(--ink-faint);">${esc(p.dataCompra)}</div>${commentHtml}</td>
       <td class="td-mono">
         ${isUSD
           ? `<span style="color:var(--nyse)">$${p.precoCompra.toFixed(2)}</span><div style="font-size:0.6rem;color:var(--ink-faint);margin-top:2px;">≈ ${fmt(p.precoCompra*cambio,'')}</div>`
