@@ -732,55 +732,6 @@ async function fetchUSDtoBRL() {
   } catch { return 5.85; }
 }
 
-async function fetchCardPrices(tendencias) {
-  const items = tendencias.filter(t => t.ticker);
-  if (items.length === 0) return;
-
-  // Fetch USD/BRL rate first
-  const cambio = await fetchUSDtoBRL();
-
-  // Fetch each ticker in parallel
-  await Promise.all(items.map(async (t) => {
-    const card = document.querySelector(`[data-ticker="${t.ticker}"]`);
-    const priceTagEl = card?.querySelector('.price-tag');
-    if (!priceTagEl) return;
-
-    const isUS = t.mercado === 'US';
-    // Yahoo symbol: BR stocks get .SA suffix, US stocks stay as-is
-    const symbol = isUS ? t.ticker : t.ticker + '.SA';
-
-    try {
-      const { price, prevClose, currency } = await fetchSinglePrice(symbol);
-      const varPct = prevClose ? ((price - prevClose) / prevClose) * 100 : 0;
-      const varSign = varPct >= 0 ? '+' : '';
-      const varColor = varPct >= 0 ? 'var(--bull)' : 'var(--bear)';
-
-      let priceHtml = '';
-      if (isUS) {
-        const priceBRL = price * cambio;
-        priceHtml = `
-          <div class="price-tag-value">R$ ${priceBRL.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-          <div class="price-tag-sub">$${price.toFixed(2)} · R$${cambio.toFixed(2)}/USD</div>
-          <div style="font-family:var(--font-mono);font-size:0.62rem;font-weight:600;color:${varColor};">${varSign}${varPct.toFixed(2)}% hoje</div>
-          <div class="price-tag-label">${t.ticker} · tempo real</div>`;
-      } else {
-        priceHtml = `
-          <div class="price-tag-value">R$ ${price.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
-          <div style="font-family:var(--font-mono);font-size:0.62rem;font-weight:600;color:${varColor};">${varSign}${varPct.toFixed(2)}% hoje</div>
-          <div class="price-tag-label">${t.ticker} · tempo real</div>`;
-      }
-
-      priceTagEl.innerHTML = priceHtml;
-      priceTagEl.style.borderColor = varPct >= 0 ? 'var(--bull-border)' : 'var(--bear-border)';
-      priceTagEl.style.background = varPct >= 0 ? 'var(--bull-bg)' : 'var(--bear-bg)';
-
-    } catch(err) {
-      priceTagEl.innerHTML = `<div class="price-tag-label" style="color:var(--ink-faint)">indisponível</div>`;
-      priceTagEl.style.borderColor = '';
-      priceTagEl.style.background = '';
-    }
-  }));
-}
 
 // ── CARTEIRA ───────────────────────────────
 let selectedMarket = 'BR';
